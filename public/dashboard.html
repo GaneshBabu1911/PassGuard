@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <meta name="description" content="Analytics dashboard showing password strength trends and validation statistics."/>
+  <title>PassGuard — Dashboard</title>
+  <link rel="stylesheet" href="css/style.css"/>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🔐</text></svg>"/>
+</head>
+<body>
+<div class="bg-orbs" aria-hidden="true">
+  <div class="orb orb-1"></div><div class="orb orb-2"></div><div class="orb orb-3"></div>
+</div>
+<div id="nav-mount"></div>
+<div class="page-wrapper">
+  <section class="page-hero">
+    <div class="eyebrow">📊 Analytics</div>
+    <h1>Security Dashboard</h1>
+    <p>Insights and trends from your password validation history. All data is stored locally in your browser.</p>
+  </section>
+  <main class="container page-body">
+    <!-- Stats row -->
+    <div class="grid-3 mb-2">
+      <div class="card stat-card">
+        <div class="stat-label">Total Validations</div>
+        <div class="stat-value" id="d-total" style="color:var(--violet)">0</div>
+        <div class="stat-sub" id="d-total-sub">No data yet</div>
+      </div>
+      <div class="card stat-card">
+        <div class="stat-label">Pass Rate</div>
+        <div class="stat-value" id="d-pass" style="color:var(--green)">—</div>
+        <div class="stat-sub" id="d-pass-sub">Passwords that passed</div>
+      </div>
+      <div class="card stat-card">
+        <div class="stat-label">Avg Score</div>
+        <div class="stat-value" id="d-avg" style="color:var(--cyan)">—</div>
+        <div class="stat-sub">Out of 100</div>
+      </div>
+    </div>
+    <div class="grid-2">
+      <!-- Left column -->
+      <div class="flex-col gap-3">
+        <!-- Strength distribution -->
+        <div class="card">
+          <div class="card-header"><div class="card-icon ci-purple">📊</div><h2 class="card-title">Strength Distribution</h2></div>
+          <div class="card-body">
+            <div id="dist-chart" class="bar-chart">
+              <div class="empty-state" id="dist-empty" style="padding:1.5rem"><div class="empty-icon">📊</div><div class="empty-msg">Validate some passwords to see distribution.</div></div>
+            </div>
+          </div>
+        </div>
+        <!-- Score trend -->
+        <div class="card">
+          <div class="card-header"><div class="card-icon ci-cyan">📈</div><h2 class="card-title">Score Timeline</h2></div>
+          <div class="card-body">
+            <canvas id="trend-canvas" width="460" height="160" style="width:100%;border-radius:8px"></canvas>
+            <div class="empty-state" id="trend-empty" style="padding:1rem"><div class="empty-icon">📈</div><div class="empty-msg">Need at least 3 validations for trend.</div></div>
+          </div>
+        </div>
+      </div>
+      <!-- Right column -->
+      <div class="flex-col gap-3">
+        <!-- Best/Worst -->
+        <div class="card">
+          <div class="card-header"><div class="card-icon ci-green">🏆</div><h2 class="card-title">Score Highlights</h2></div>
+          <div class="card-body">
+            <div class="flex-col gap-2">
+              <div>
+                <div class="label">Highest Score</div>
+                <div id="d-high" class="stat-value" style="color:var(--green);font-size:1.8rem">—</div>
+              </div>
+              <div>
+                <div class="label">Lowest Score</div>
+                <div id="d-low" class="stat-value" style="color:var(--red);font-size:1.8rem">—</div>
+              </div>
+              <div>
+                <div class="label">Most Common Level</div>
+                <div id="d-common" class="stat-value" style="font-size:1.1rem;color:var(--violet)">—</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <!-- Score gauge -->
+        <div class="card">
+          <div class="card-header"><div class="card-icon ci-amber">🎯</div><h2 class="card-title">Security Posture</h2></div>
+          <div class="card-body" style="display:flex;flex-direction:column;align-items:center;gap:1rem">
+            <div class="ring-svg-wrap" style="width:150px;height:150px">
+              <svg width="150" height="150" viewBox="0 0 150 150">
+                <circle cx="75" cy="75" r="62" fill="none" stroke="rgba(255,255,255,.06)" stroke-width="10"/>
+                <circle id="posture-ring" cx="75" cy="75" r="62" fill="none" stroke="var(--cyan)" stroke-width="10"
+                  stroke-linecap="round" transform="rotate(-90 75 75)"
+                  style="stroke-dasharray:389.6;stroke-dashoffset:389.6;transition:stroke-dashoffset 1s ease,stroke .5s ease"/>
+              </svg>
+              <div class="ring-val">
+                <span id="posture-num" class="ring-num" style="color:var(--cyan);font-size:2rem">—</span>
+                <span class="ring-lbl">Avg Score</span>
+              </div>
+            </div>
+            <div id="posture-advice" class="text-sm text-muted" style="text-align:center;max-width:260px;line-height:1.6">
+              Validate more passwords to see your security posture.
+            </div>
+          </div>
+        </div>
+        <!-- Recent activity -->
+        <div class="card">
+          <div class="card-header"><div class="card-icon ci-pink">🕐</div><h2 class="card-title">Recent Activity</h2></div>
+          <div class="card-body flex-col gap-1" id="recent-list" style="max-height:220px;overflow-y:auto">
+            <div class="empty-state" id="recent-empty" style="padding:1rem"><div class="empty-icon">🕐</div><div class="empty-msg">No recent activity.</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+<script src="js/shared.js"></script>
+<script src="js/dashboard.js"></script>
+</body>
+</html>

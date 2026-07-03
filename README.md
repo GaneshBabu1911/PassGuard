@@ -1,64 +1,101 @@
 # 🔐 PassGuard — Enterprise Password Strength Validator
 
-A **market-ready**, full-stack password strength validator with a stunning dark glassmorphism UI, real-time analysis, and a REST API backend — all ported faithfully from the original Java implementation.
+A **market-ready**, multi-page full-stack password strength validator with a stunning dark/light glassmorphism UI, real-time analysis, and serverless backend API — optimized for instant deployment to **Vercel**.
 
 ---
 
-## 🚀 Quick Start
+## 📁 Vercel Project Structure
 
-### Option A: Full-Stack (Recommended)
-Requires **Node.js 16+**
+To ensure correct routing and prevent 404 errors, the files are structured in the standard Vercel layout:
+
+```
+password-validator/
+├── api/                # Serverless Backend API
+│   ├── _validator.js   # Shared validation logic
+│   ├── validate.js     # POST /api/validate serverless endpoint
+│   ├── health.js       # GET /api/health serverless endpoint
+│   └── policy.js       # GET /api/policy serverless endpoint
+├── public/             # Static Frontend Assets (Served at root "/")
+│   ├── css/
+│   │   └── style.css   # Premium Dark/Light theme design system
+│   ├── js/
+│   │   ├── app.js          # Validator UI logic
+│   │   ├── breach.js       # HaveIBeenPwned live checker
+│   │   ├── dashboard.js    # HTML5 Canvas line/bar charts logic
+│   │   ├── generator.js    # EFF Passphrase generator & entropy engine
+│   │   ├── history.js      # Audit trail logic
+│   │   ├── policy.js       # Custom security policy manager
+│   │   ├── shared.js       # Navigation, theme toggle, and utility functions
+│   │   ├── twofa.js        # Interactive 2FA setup guide
+│   │   └── validator-core.js # Client-side validation fallback
+│   ├── index.html          # Core password validator page
+│   ├── breach.html         # Data breach lookup page
+│   ├── generator.html      # Memorability-focused passphrase generator
+│   ├── history.html        # Local validation history log
+│   ├── policy.html         # Organization policy configurator
+│   ├── dashboard.html      # Security posture & trends dashboard
+│   └── twofa.html          # Two-factor authentication checklist & guide
+├── package.json        # Node configuration
+└── vercel.json         # Vercel deployment settings (clean URLs)
+```
+
+---
+
+## 🚀 How to Deploy to Vercel
+
+### Option 1: Vercel Dashboard (Easiest)
+1. Push this project folder to your GitHub, GitLab, or Bitbucket repository.
+2. Go to the [Vercel Dashboard](https://vercel.com/dashboard) and click **Add New > Project**.
+3. Select your repository and click **Import**.
+4. Click **Deploy**. Vercel will automatically detect the static assets in `/public` and serve them at the root route `/`, and run your API functions under `/api/*`.
+
+### Option 2: Vercel CLI (Command Line)
+If you have the Vercel CLI installed on your machine:
+```bash
+# 1. Run the deployment command from the project root
+vercel
+
+# 2. To deploy directly to production
+vercel --prod
+```
+
+---
+
+## 💻 Local Development with Vercel
+
+To run the serverless functions and the frontend locally exactly as they would run on Vercel:
 
 ```bash
-# 1. Install backend dependencies
-cd backend
-npm install
+# 1. Install Vercel CLI if you haven't already
+npm install -g vercel
 
-# 2. Start the server (serves both API + frontend)
-node server.js
+# 2. Start the local serverless development server
+vercel dev
 
 # 3. Open browser
 # http://localhost:3000
 ```
-
-### Option B: Frontend Only (No Node.js needed)
-Open `frontend/index.html` directly in your browser.
-The app works offline using client-side validation. All 10 security rules run in the browser.
+*(The dev server will watch files and automatically hot-reload both serverless endpoints and frontend assets).*
 
 ---
 
-## 📁 Project Structure
+## 🔌 Serverless REST API
 
-```
-password-validator/
-├── backend/
-│   ├── server.js       # Express REST API (port 3000)
-│   ├── validator.js    # All validation logic (ported from Java)
-│   └── package.json
-└── frontend/
-    ├── index.html      # Main application
-    ├── css/
-    │   └── style.css   # Dark glassmorphism design system
-    └── js/
-        └── app.js      # UI logic, API calls, animations
-```
-
----
-
-## 🔌 REST API
+All serverless functions are written in pure Node.js (CommonJS) and run instantly as Vercel Edge/Serverless functions.
 
 ### `POST /api/validate`
+Validates password strength against the default or customized policy.
 ```json
 // Request
 {
-  "username": "john_doe",
-  "password": "MyStr0ng!Pass#2024"
+  "username": "admin_user",
+  "password": "MyS3curePass!2026"
 }
 
 // Response
 {
   "valid": true,
-  "score": 95,
+  "score": 100,
   "level": "Very Strong",
   "feedback": [],
   "details": {
@@ -72,106 +109,36 @@ password-validator/
     "noRepeated": true,
     "noSequential": true,
     "noCommonSeq": true,
-    "entropy": 113
+    "entropy": 110
   }
 }
 ```
 
 ### `GET /api/health`
-Returns server status and version.
+Health check endpoint verifying the serverless API functionality.
 
 ### `GET /api/policy`
-Returns current security policy rules and score thresholds.
-
-**Rate limit:** 60 requests/minute per IP
+Returns security policy requirements and scoring configuration.
 
 ---
 
-## 🛡️ Security Rules (from Java original)
+## ✨ Application Modules
 
-| Rule | Points |
-|---|---|
-| Length ≥ 12 characters | +25 |
-| Has uppercase (A–Z) | +15 |
-| Has lowercase (a–z) | +15 |
-| Has digit (0–9) | +15 |
-| Has special character | +15 |
-| No repeated chars (aaa) | +5 |
-| No sequential chars (abc) | +5 |
-| No username in password | +5 |
-| Not a banned password | +5 |
-| Bonus: length ≥ 16 | +5 |
-| Bonus: length ≥ 20 | +5 |
-| No keyboard sequence | +5 |
-
-### Strength Levels
-| Level | Score |
-|---|---|
-| Very Strong | 90–100 |
-| Strong | 75–89 |
-| Medium | 60–74 |
-| Weak | 40–59 |
-| Very Weak | 0–39 |
+1. **Validator (index.html)**: Live-typing scoring feedback with interactive checks, animated SVG score ring, strength meter, and password visibility toggle.
+2. **Breach Check (breach.html)**: Queries the official HaveIBeenPwned API using **k-anonymity** (hashes are generated locally, and only the first 5 characters are sent to preserve privacy).
+3. **Generator (generator.html)**: Generates high-entropy passphrases using a curated 512-word list. Supports customizable length, symbols, capitalisation, numbers, and lists calculated crack time.
+4. **History (history.html)**: Keeps a local audit log of previous validation attempts (timestamp, score, level, validation status). *No passwords are ever saved for security.*
+5. **Policy Configurator (policy.html)**: Customize password criteria (length, character requirements, custom banned keywords) and preview its feasibility in real-time.
+6. **Dashboard (dashboard.html)**: Interactive reports displaying validation history distribution, security posture rating, and an HTML5 Canvas score trend chart.
+7. **2FA Guide (twofa.html)**: Fully interactive tutorial explaining modern 2FA methods (TOTP apps, hardware keys, passkeys) with personal setup checklists.
 
 ---
 
-## ✨ Features
-
-- **Real-time live validation** — instant feedback as you type (debounced 300ms)
-- **Animated strength bar** with shimmer effect
-- **SVG score ring** with smooth stroke animation
-- **Entropy estimation** displayed below password field
-- **10-rule security checklist** with live pass/fail indicators
-- **Confetti animation** for "Very Strong" passwords 🎉
-- **Toast notifications** for key events
-- **Password visibility toggle**
-- **Offline fallback** — works without the backend server
-- **Glassmorphism dark UI** with animated background orbs
-- **4 info tabs**: Future Scope, Security Policy, Tips, API Docs
-- **Fully accessible** — ARIA labels, roles, live regions
+## 🛡️ Standards Alignment
+- **NIST SP 800-63B**: Password length, complexity, and reuse standards.
+- **OWASP Application Security Verification Standard (ASVS)**: Modern authentication requirements.
+- **CWE-521**: Weak password requirements protection.
 
 ---
 
-## 🔮 Future Scope
-
-| Feature | Status |
-|---|---|
-| HaveIBeenPwned breach check | Planned v2 |
-| Password history (no-reuse) | Planned v2 |
-| EFF Passphrase generator | Planned v2 |
-| Enterprise policy configurator | Enterprise |
-| Audit dashboard & analytics | Enterprise |
-| TOTP/FIDO2 2FA guidance | Planned v3 |
-
----
-
-## 🚢 Deployment
-
-### Deploy to any Node.js host (Railway, Render, Heroku, etc.)
-```bash
-# Set PORT environment variable
-PORT=8080 node backend/server.js
-```
-
-### Docker (optional)
-```dockerfile
-FROM node:18-alpine
-WORKDIR /app
-COPY backend/ ./backend/
-COPY frontend/ ./frontend/
-WORKDIR /app/backend
-RUN npm install --production
-EXPOSE 3000
-CMD ["node", "server.js"]
-```
-
----
-
-## 📜 Standards Compliance
-- NIST SP 800-63B password guidelines
-- OWASP Authentication Cheat Sheet
-- CWE-521: Weak Password Requirements mitigation
-
----
-
-*Built with Node.js + Express + Vanilla HTML/CSS/JS*
+*Built with Vanilla HTML/CSS/JS & Node.js Serverless Functions.*

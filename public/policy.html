@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <meta name="description" content="Customise password validation rules and security policy."/>
+  <title>PassGuard — Policy Configurator</title>
+  <link rel="stylesheet" href="css/style.css"/>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🔐</text></svg>"/>
+</head>
+<body>
+<div class="bg-orbs" aria-hidden="true">
+  <div class="orb orb-1"></div><div class="orb orb-2"></div><div class="orb orb-3"></div>
+</div>
+<div id="nav-mount"></div>
+<div class="page-wrapper">
+  <section class="page-hero">
+    <div class="eyebrow">⚙️ Enterprise Customisation</div>
+    <h1>Policy Configurator</h1>
+    <p>Customise password validation rules to match your organisation's security requirements. Changes apply immediately to the validator.</p>
+  </section>
+  <main class="container page-body">
+    <div class="grid-2">
+      <div class="flex-col gap-3">
+        <div class="card">
+          <div class="card-header"><div class="card-icon ci-purple">📏</div><h2 class="card-title">Length Requirements</h2></div>
+          <div class="card-body">
+            <div class="form-group">
+              <label class="label">Minimum Password Length</label>
+              <div class="range-wrap">
+                <input type="range" id="min-len" class="range-input" min="6" max="32" value="12"/>
+                <span class="range-val" id="min-len-val">12</span>
+              </div>
+              <div class="text-xs text-muted mt-1">NIST recommends at least 8, enterprise typically 12–16.</div>
+            </div>
+            <div class="form-group">
+              <label class="label">Max Repeated Characters</label>
+              <div class="range-wrap">
+                <input type="range" id="max-rep" class="range-input" min="2" max="6" value="3"/>
+                <span class="range-val" id="max-rep-val">3</span>
+              </div>
+              <div class="text-xs text-muted mt-1">Trigger warning when N+ consecutive chars are the same (e.g. 'aaa').</div>
+            </div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-header"><div class="card-icon ci-cyan">🔡</div><h2 class="card-title">Character Requirements</h2></div>
+          <div class="card-body">
+            <div class="toggle-row">
+              <span class="toggle-label">Require uppercase letter (A–Z)</span>
+              <label class="toggle-switch"><input type="checkbox" id="req-upper" checked/><span class="toggle-slider"></span></label>
+            </div>
+            <div class="toggle-row">
+              <span class="toggle-label">Require lowercase letter (a–z)</span>
+              <label class="toggle-switch"><input type="checkbox" id="req-lower" checked/><span class="toggle-slider"></span></label>
+            </div>
+            <div class="toggle-row">
+              <span class="toggle-label">Require digit (0–9)</span>
+              <label class="toggle-switch"><input type="checkbox" id="req-digit" checked/><span class="toggle-slider"></span></label>
+            </div>
+            <div class="toggle-row">
+              <span class="toggle-label">Require special character (!@#$…)</span>
+              <label class="toggle-switch"><input type="checkbox" id="req-sym" checked/><span class="toggle-slider"></span></label>
+            </div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-header"><div class="card-icon ci-red">🚫</div><h2 class="card-title">Custom Banned Words</h2></div>
+          <div class="card-body">
+            <div class="form-group">
+              <label class="label">Add banned words (one per line)</label>
+              <textarea id="banned-words" class="form-input no-icon" placeholder="company&#10;projectname&#10;teamname" rows="4"></textarea>
+              <div class="text-xs text-muted mt-1">Passwords containing these words will be flagged as banned (in addition to the built-in list).</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="flex-col gap-3">
+        <!-- Live preview -->
+        <div class="card">
+          <div class="card-header"><div class="card-icon ci-green">👁️</div><h2 class="card-title">Policy Preview</h2></div>
+          <div class="card-body">
+            <div id="policy-preview" class="flex-col gap-1"></div>
+          </div>
+        </div>
+        <!-- Score impact -->
+        <div class="card">
+          <div class="card-header"><div class="card-icon ci-amber">📊</div><h2 class="card-title">Score Impact</h2></div>
+          <div class="card-body">
+            <div class="text-sm text-muted" style="line-height:1.7;margin-bottom:1rem">Based on your current policy, a password would need to satisfy these criteria to achieve each score level:</div>
+            <div id="score-impact" class="flex-col gap-1"></div>
+          </div>
+        </div>
+        <!-- Actions -->
+        <div class="card">
+          <div class="card-header"><div class="card-icon ci-purple">💾</div><h2 class="card-title">Save Policy</h2></div>
+          <div class="card-body flex-col gap-1">
+            <button id="save-btn" class="btn btn-primary btn-full">💾 Save Policy</button>
+            <button id="reset-btn" class="btn btn-danger btn-full">↺ Reset to Defaults</button>
+            <a href="index.html" class="btn btn-green btn-full">🔑 Test in Validator</a>
+            <div class="text-xs text-muted" style="text-align:center;margin-top:.5rem">Policy is saved to your browser and applied globally.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+<script src="js/shared.js"></script>
+<script src="js/policy.js"></script>
+</body>
+</html>

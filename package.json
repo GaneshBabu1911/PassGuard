@@ -1,0 +1,12 @@
+{
+  "name": "passguard-validator",
+  "version": "1.1.0",
+  "description": "Enterprise-grade password strength validator, multi-page ready for Vercel deployment.",
+  "scripts": {
+    "dev": "vercel dev"
+  },
+  "dependencies": {},
+  "engines": {
+    "node": ">=18"
+  }
+}
