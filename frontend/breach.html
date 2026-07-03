@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <meta name="description" content="Check if your password has been exposed in a known data breach using the HaveIBeenPwned k-anonymity API."/>
+  <title>PassGuard — Breach Checker</title>
+  <link rel="stylesheet" href="css/style.css"/>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🔐</text></svg>"/>
+</head>
+<body>
+<div class="bg-orbs" aria-hidden="true">
+  <div class="orb orb-1"></div><div class="orb orb-2"></div><div class="orb orb-3"></div>
+</div>
+<div id="nav-mount"></div>
+<div class="page-wrapper">
+  <section class="page-hero">
+    <div class="eyebrow">🔍 HaveIBeenPwned Integration</div>
+    <h1>Breach Check</h1>
+    <p>Find out if your password appears in any known data breach database — using k-anonymity so your password is <em>never</em> transmitted.</p>
+  </section>
+  <main class="container page-body">
+    <div class="grid-2">
+      <!-- Input -->
+      <div class="flex-col gap-3">
+        <div class="card">
+          <div class="card-header"><div class="card-icon ci-red">🔍</div><h2 class="card-title">Check Password</h2><span class="badge badge-green badge-live" style="margin-left:auto">Live API</span></div>
+          <div class="card-body">
+            <div class="form-group">
+              <label class="label" for="bc-pw">Password to Check</label>
+              <div class="input-wrap pw-wrap">
+                <span class="input-icon">🔒</span>
+                <input type="password" id="bc-pw" class="form-input" placeholder="Enter any password…" maxlength="512" autocomplete="new-password"/>
+                <button type="button" id="bc-vis" class="vis-toggle" aria-label="Toggle visibility">
+                  <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                </button>
+              </div>
+            </div>
+            <button id="bc-btn" class="btn btn-primary btn-full btn-lg">
+              <div class="btn-spinner" id="bc-spin"></div>
+              <span id="bc-lbl">🔍 Check for Breaches</span>
+            </button>
+            <!-- Hash preview -->
+            <div id="hash-preview" class="mt-2" style="display:none">
+              <div class="label">SHA-1 Hash Sent to HIBP API (first 5 chars only)</div>
+              <div class="code-block" id="hash-display" style="font-size:0.7rem;letter-spacing:0.05em"></div>
+              <div class="text-xs text-muted mt-1">Your full password hash is <strong>never</strong> transmitted — only the 5-char prefix. This is k-anonymity.</div>
+            </div>
+          </div>
+        </div>
+        <!-- How it works -->
+        <div class="card">
+          <div class="card-header"><div class="card-icon ci-purple">🔐</div><h2 class="card-title">How K-Anonymity Works</h2></div>
+          <div class="card-body flex-col gap-2">
+            <div class="flex gap-2 items-center">
+              <div style="width:28px;height:28px;border-radius:50%;background:rgba(124,58,237,.15);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:.75rem;font-weight:700;color:var(--violet)">1</div>
+              <div class="text-sm text-muted">Your browser SHA-1 hashes the password <em>locally</em></div>
+            </div>
+            <div class="flex gap-2 items-center">
+              <div style="width:28px;height:28px;border-radius:50%;background:rgba(124,58,237,.15);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:.75rem;font-weight:700;color:var(--violet)">2</div>
+              <div class="text-sm text-muted">Only the <strong>first 5 characters</strong> of the hash are sent to <code style="color:var(--cyan)">api.pwnedpasswords.com</code></div>
+            </div>
+            <div class="flex gap-2 items-center">
+              <div style="width:28px;height:28px;border-radius:50%;background:rgba(124,58,237,.15);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:.75rem;font-weight:700;color:var(--violet)">3</div>
+              <div class="text-sm text-muted">The API returns all hashes starting with those 5 chars (~400 results)</div>
+            </div>
+            <div class="flex gap-2 items-center">
+              <div style="width:28px;height:28px;border-radius:50%;background:rgba(124,58,237,.15);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:.75rem;font-weight:700;color:var(--violet)">4</div>
+              <div class="text-sm text-muted">We check locally if the <strong>remaining 35 chars</strong> appear in the list</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- Result -->
+      <div class="flex-col gap-3">
+        <div class="card">
+          <div class="card-header"><div class="card-icon ci-amber">📋</div><h2 class="card-title">Result</h2></div>
+          <div class="card-body">
+            <!-- Idle state -->
+            <div id="bc-idle" class="empty-state">
+              <div class="empty-icon">🛡️</div>
+              <div class="empty-msg">Enter a password and click Check to see if it's been exposed in a breach.</div>
+            </div>
+            <!-- Safe result -->
+            <div id="bc-safe" class="breach-result safe">
+              <div class="breach-icon">✅</div>
+              <div style="font-size:1.1rem;font-weight:700;color:var(--green)">Not Found in Any Breach</div>
+              <div class="breach-tip">This password doesn't appear in any known data breach database. That's a good sign — but remember to use a unique password for every account.</div>
+              <a href="twofa.html" class="btn btn-green btn-sm">🛡️ Still, enable 2FA</a>
+            </div>
+            <!-- Pwned result -->
+            <div id="bc-pwned" class="breach-result pwned">
+              <div class="breach-icon">🚨</div>
+              <div style="font-size:1rem;font-weight:600;color:var(--text2)">Seen in data breaches</div>
+              <div id="bc-count" class="breach-count">0</div>
+              <div style="font-size:.8rem;color:var(--text3)">times</div>
+              <div class="breach-tip" id="bc-advice"></div>
+              <div class="flex gap-1">
+                <a href="generator.html" class="btn btn-primary btn-sm">🎲 Generate New Password</a>
+                <a href="twofa.html" class="btn btn-secondary btn-sm">🛡️ Enable 2FA</a>
+              </div>
+            </div>
+          </div>
+        </div>
+        <!-- Batch check -->
+        <div class="card">
+          <div class="card-header"><div class="card-icon ci-cyan">📋</div><h2 class="card-title">Batch Check History</h2></div>
+          <div class="card-body">
+            <div id="batch-list" class="flex-col gap-1" style="max-height:220px;overflow-y:auto"></div>
+            <div id="batch-empty" class="text-sm text-muted" style="text-align:center;padding:1.5rem 0">No checks yet — results appear here after each check.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+<script src="js/shared.js"></script>
+<script src="js/breach.js"></script>
+</body>
+</html>

@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <meta name="description" content="Complete guide to setting up two-factor authentication (2FA) for your accounts."/>
+  <title>PassGuard — 2FA Guide</title>
+  <link rel="stylesheet" href="css/style.css"/>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🔐</text></svg>"/>
+</head>
+<body>
+<div class="bg-orbs" aria-hidden="true">
+  <div class="orb orb-1"></div><div class="orb orb-2"></div><div class="orb orb-3"></div>
+</div>
+<div id="nav-mount"></div>
+<div class="page-wrapper">
+  <section class="page-hero">
+    <div class="eyebrow">🛡️ Account Security</div>
+    <h1>Two-Factor Authentication</h1>
+    <p>A strong password is just the first layer. Enable 2FA to make your accounts virtually impenetrable even if your password is stolen.</p>
+  </section>
+  <main class="container page-body">
+    <!-- Method picker -->
+    <div class="card mb-2">
+      <div class="card-header"><div class="card-icon ci-purple">🛡️</div><h2 class="card-title">Choose a 2FA Method</h2></div>
+      <div class="card-body">
+        <div class="method-cards" id="method-cards">
+          <div class="method-card" data-method="totp" onclick="selectMethod('totp')">
+            <div class="method-icon">📱</div>
+            <div class="method-title">Authenticator App (TOTP)</div>
+            <div class="method-desc">Time-based codes from an app like Google Authenticator or Authy. Works offline.</div>
+            <div class="security-dots">
+              <span class="sdot fill"></span><span class="sdot fill"></span><span class="sdot fill"></span><span class="sdot fill"></span><span class="sdot half"></span>
+            </div>
+            <div class="text-xs text-muted mt-1">Security: Very High · Recommended</div>
+          </div>
+          <div class="method-card" data-method="hardware" onclick="selectMethod('hardware')">
+            <div class="method-icon">🔑</div>
+            <div class="method-title">Hardware Security Key</div>
+            <div class="method-desc">Physical key (YubiKey, Google Titan). Phishing-resistant. The gold standard.</div>
+            <div class="security-dots">
+              <span class="sdot fill"></span><span class="sdot fill"></span><span class="sdot fill"></span><span class="sdot fill"></span><span class="sdot fill"></span>
+            </div>
+            <div class="text-xs text-muted mt-1">Security: Maximum</div>
+          </div>
+          <div class="method-card" data-method="passkey" onclick="selectMethod('passkey')">
+            <div class="method-icon">🪪</div>
+            <div class="method-title">Passkeys (FIDO2)</div>
+            <div class="method-desc">Biometric-backed cryptographic credentials. No password needed at all.</div>
+            <div class="security-dots">
+              <span class="sdot fill"></span><span class="sdot fill"></span><span class="sdot fill"></span><span class="sdot fill"></span><span class="sdot fill"></span>
+            </div>
+            <div class="text-xs text-muted mt-1">Security: Maximum · Future-proof</div>
+          </div>
+          <div class="method-card" data-method="sms" onclick="selectMethod('sms')">
+            <div class="method-icon">💬</div>
+            <div class="method-title">SMS / Email OTP</div>
+            <div class="method-desc">One-time codes sent via text or email. Easy to set up but vulnerable to SIM-swap.</div>
+            <div class="security-dots">
+              <span class="sdot fill"></span><span class="sdot fill"></span><span class="sdot empty"></span><span class="sdot empty"></span><span class="sdot empty"></span>
+            </div>
+            <div class="text-xs text-muted mt-1">Security: Basic · Use as last resort</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="grid-2">
+      <!-- Setup guide -->
+      <div class="flex-col gap-3">
+        <div class="card" id="setup-card">
+          <div class="card-header">
+            <div class="card-icon ci-green" id="setup-icon">📋</div>
+            <h2 class="card-title" id="setup-title">Setup Guide</h2>
+            <span class="badge badge-purple" id="setup-badge" style="margin-left:auto"></span>
+          </div>
+          <div class="card-body">
+            <div class="progress-tracker" id="progress-tracker" style="display:none"></div>
+            <div id="setup-placeholder" class="empty-state" style="padding:2rem">
+              <div class="empty-icon">👆</div>
+              <div class="empty-msg">Select a 2FA method above to see the setup guide.</div>
+            </div>
+            <div id="setup-steps" class="steps-list" style="display:none"></div>
+            <div id="completion-banner" style="display:none;margin-top:1rem;padding:1rem;background:rgba(16,185,129,.08);border:1px solid rgba(16,185,129,.25);border-radius:12px;text-align:center">
+              <div style="font-size:2rem">🎉</div>
+              <div style="font-weight:700;margin:.3rem 0">All steps completed!</div>
+              <div class="text-sm text-muted">Your account is now protected with 2FA. Stay safe!</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- App picker (TOTP only) -->
+        <div class="card" id="app-picker-card" style="display:none">
+          <div class="card-header"><div class="card-icon ci-cyan">📱</div><h2 class="card-title">Recommended Apps</h2></div>
+          <div class="card-body">
+            <div class="app-chips" id="app-chips">
+              <div class="app-chip" onclick="toggleApp(this)">Google Authenticator</div>
+              <div class="app-chip" onclick="toggleApp(this)">Authy</div>
+              <div class="app-chip" onclick="toggleApp(this)">Microsoft Authenticator</div>
+              <div class="app-chip" onclick="toggleApp(this)">Bitwarden</div>
+              <div class="app-chip" onclick="toggleApp(this)">1Password</div>
+              <div class="app-chip" onclick="toggleApp(this)">Aegis (Android)</div>
+              <div class="app-chip" onclick="toggleApp(this)">Raivo (iOS)</div>
+              <div class="app-chip" onclick="toggleApp(this)">andOTP</div>
+            </div>
+            <div class="text-xs text-muted mt-2">Click to mark apps you've used. Avoid SMS-based solutions for sensitive accounts.</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right column -->
+      <div class="flex-col gap-3">
+        <!-- Security comparison -->
+        <div class="card">
+          <div class="card-header"><div class="card-icon ci-amber">🔒</div><h2 class="card-title">Security Comparison</h2></div>
+          <div class="card-body">
+            <div class="table-wrap">
+              <table>
+                <thead><tr><th>Method</th><th>Phishing</th><th>SIM-swap</th><th>Offline</th><th>Ease</th></tr></thead>
+                <tbody>
+                  <tr><td>🔑 Hardware Key</td><td style="color:var(--green)">✅ Safe</td><td style="color:var(--green)">✅ Safe</td><td style="color:var(--green)">✅</td><td style="color:var(--amber)">Medium</td></tr>
+                  <tr><td>🪪 Passkey</td><td style="color:var(--green)">✅ Safe</td><td style="color:var(--green)">✅ Safe</td><td style="color:var(--amber)">Partial</td><td style="color:var(--green)">Easy</td></tr>
+                  <tr><td>📱 TOTP App</td><td style="color:var(--amber)">⚠️ Risk</td><td style="color:var(--green)">✅ Safe</td><td style="color:var(--green)">✅</td><td style="color:var(--green)">Easy</td></tr>
+                  <tr><td>💬 SMS OTP</td><td style="color:var(--amber)">⚠️ Risk</td><td style="color:var(--red)">❌ Vuln</td><td style="color:var(--red)">❌</td><td style="color:var(--green)">Easiest</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- Quick checklist -->
+        <div class="card">
+          <div class="card-header"><div class="card-icon ci-red">✅</div><h2 class="card-title">My 2FA Checklist</h2><button class="btn btn-secondary btn-sm" style="margin-left:auto" onclick="resetChecklist()">Reset</button></div>
+          <div class="card-body">
+            <div class="flex-col gap-1" id="my-checklist">
+              <div class="step-item" onclick="toggleCheck(this)" id="chk-email"><div class="step-num">1</div><div class="step-content"><div class="step-title">Email account protected</div><div class="step-desc">Gmail, Outlook, or iCloud — most critical account to protect.</div></div></div>
+              <div class="step-item" onclick="toggleCheck(this)" id="chk-bank"><div class="step-num">2</div><div class="step-content"><div class="step-title">Banking / Financial accounts</div><div class="step-desc">Enable 2FA on all banking apps and payment services.</div></div></div>
+              <div class="step-item" onclick="toggleCheck(this)" id="chk-social"><div class="step-num">3</div><div class="step-content"><div class="step-title">Social media accounts</div><div class="step-desc">Facebook, Twitter/X, Instagram, LinkedIn — high-value targets.</div></div></div>
+              <div class="step-item" onclick="toggleCheck(this)" id="chk-work"><div class="step-num">4</div><div class="step-content"><div class="step-title">Work / Corporate accounts</div><div class="step-desc">GitHub, Slack, Google Workspace, Microsoft 365.</div></div></div>
+              <div class="step-item" onclick="toggleCheck(this)" id="chk-backup"><div class="step-num">5</div><div class="step-content"><div class="step-title">Backup codes saved securely</div><div class="step-desc">Download and store emergency backup codes somewhere safe.</div></div></div>
+            </div>
+            <div id="checklist-progress" class="mt-2 text-sm text-muted" style="text-align:center">0 / 5 completed</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+<script src="js/shared.js"></script>
+<script src="js/twofa.js"></script>
+</body>
+</html>

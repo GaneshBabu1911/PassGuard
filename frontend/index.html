@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <meta name="description" content="Enterprise password strength validator with real-time analysis, 10+ security rules, and intelligent feedback."/>
+  <title>PassGuard — Password Validator</title>
+  <link rel="stylesheet" href="css/style.css"/>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🔐</text></svg>"/>
+</head>
+<body>
+<div class="bg-orbs" aria-hidden="true">
+  <div class="orb orb-1"></div><div class="orb orb-2"></div><div class="orb orb-3"></div>
+</div>
+<div id="nav-mount"></div>
+<div class="page-wrapper">
+  <section class="page-hero">
+    <div class="eyebrow">🛡️ Enterprise Security Policy</div>
+    <h1>Is Your Password<br/>Strong Enough?</h1>
+    <p>Real-time analysis with 10+ security rules, entropy estimation, and intelligent feedback — aligned to NIST SP 800-63B.</p>
+  </section>
+  <main class="container page-body">
+    <div class="grid-2">
+      <!-- LEFT -->
+      <div class="flex-col gap-3">
+        <!-- Validator card -->
+        <div class="card">
+          <div class="card-header">
+            <div class="card-icon ci-purple">🔑</div>
+            <h2 class="card-title">Validate Password</h2>
+            <span id="policy-indicator" class="badge badge-purple" style="margin-left:auto;font-size:0.68rem;" title="Current policy"></span>
+          </div>
+          <div class="card-body">
+            <div class="form-group">
+              <label class="label" for="username">Username</label>
+              <div class="input-wrap">
+                <span class="input-icon">👤</span>
+                <input type="text" id="username" class="form-input" placeholder="Enter username…" autocomplete="username" maxlength="128"/>
+              </div>
+            </div>
+            <div class="form-group">
+              <label class="label" for="password">Password</label>
+              <div class="input-wrap pw-wrap">
+                <span class="input-icon">🔒</span>
+                <input type="password" id="password" class="form-input" placeholder="Enter password to analyse…" autocomplete="new-password" maxlength="512" aria-describedby="entropy-hint"/>
+                <button type="button" id="vis-btn" class="vis-toggle" aria-label="Toggle password visibility">
+                  <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                </button>
+              </div>
+              <div id="entropy-hint" class="text-xs text-muted mono mt-1" style="opacity:0;transition:opacity .3s"></div>
+            </div>
+            <!-- Strength meter -->
+            <div class="mt-2" aria-live="polite" aria-label="Password strength">
+              <div class="str-header">
+                <span class="str-label-txt">Strength</span>
+                <span id="str-badge" class="str-badge level-very-weak">—</span>
+              </div>
+              <div class="str-track" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">
+                <div id="str-fill" class="str-fill"></div>
+              </div>
+              <div class="str-score"><span id="str-score" class="str-score-num" data-v="0">0</span><span class="str-score-tot">&thinsp;/ 100</span></div>
+            </div>
+            <button id="validate-btn" class="btn btn-primary btn-full btn-lg mt-2">
+              <div class="btn-spinner" id="btn-spin"></div>
+              <span id="btn-lbl">🔍 Validate Password</span>
+            </button>
+          </div>
+        </div>
+        <!-- Checklist -->
+        <div class="card">
+          <div class="card-header"><div class="card-icon ci-green">✅</div><h2 class="card-title">Security Requirements</h2></div>
+          <div class="card-body" style="padding-top:1rem">
+            <ul id="checklist" class="checklist" aria-label="Password requirements"></ul>
+          </div>
+        </div>
+      </div>
+      <!-- RIGHT -->
+      <div class="flex-col gap-3">
+        <div class="card result-panel" id="result-panel" aria-live="polite" role="region" aria-label="Validation result">
+          <div id="result-bar" class="result-bar bad">
+            <div id="res-icon" class="result-status-icon">⏳</div>
+            <div>
+              <div id="res-head" class="result-status-head">Waiting for input…</div>
+              <div id="res-sub" class="result-status-sub">Enter a password above and click Validate</div>
+            </div>
+          </div>
+          <div class="ring-wrap">
+            <div class="ring-svg-wrap">
+              <svg width="130" height="130" viewBox="0 0 130 130" aria-hidden="true">
+                <circle cx="65" cy="65" r="52" fill="none" stroke="rgba(255,255,255,.06)" stroke-width="9"/>
+                <circle id="ring-circle" cx="65" cy="65" r="52" fill="none" stroke="#ef4444" stroke-width="9" stroke-linecap="round"
+                  style="stroke-dasharray:326.7;stroke-dashoffset:326.7;transition:stroke-dashoffset .6s cubic-bezier(.34,1.56,.64,1),stroke .4s ease"/>
+              </svg>
+              <div class="ring-val">
+                <span id="ring-num" class="ring-num" style="color:#ef4444">0</span>
+                <span class="ring-lbl">Score</span>
+              </div>
+            </div>
+            <div id="ring-entropy" class="ring-entropy"></div>
+          </div>
+          <div id="chips-grid" class="chips-grid"></div>
+          <ul id="fb-list" class="fb-list" aria-label="Feedback"></ul>
+        </div>
+        <!-- Quick links -->
+        <div class="card">
+          <div class="card-header"><div class="card-icon ci-cyan">⚡</div><h2 class="card-title">Tools</h2></div>
+          <div class="card-body flex-col gap-1">
+            <a href="breach.html" class="btn btn-secondary">🔍 Check if password was breached</a>
+            <a href="generator.html" class="btn btn-secondary">🎲 Generate a strong passphrase</a>
+            <a href="policy.html" class="btn btn-secondary">⚙️ Customise security policy</a>
+            <a href="twofa.html" class="btn btn-secondary">🛡️ Set up two-factor authentication</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+<script src="js/shared.js"></script>
+<script src="js/validator-core.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>

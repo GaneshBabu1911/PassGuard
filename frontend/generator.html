@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <meta name="description" content="Generate strong, memorable passphrases using the EFF wordlist with configurable options."/>
+  <title>PassGuard — Passphrase Generator</title>
+  <link rel="stylesheet" href="css/style.css"/>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🔐</text></svg>"/>
+</head>
+<body>
+<div class="bg-orbs" aria-hidden="true">
+  <div class="orb orb-1"></div><div class="orb orb-2"></div><div class="orb orb-3"></div>
+</div>
+<div id="nav-mount"></div>
+<div class="page-wrapper">
+  <section class="page-hero">
+    <div class="eyebrow">🎲 EFF Wordlist Based</div>
+    <h1>Passphrase Generator</h1>
+    <p>Generate memorable, high-entropy passphrases. Long word combinations are both easier to remember and mathematically stronger than short random passwords.</p>
+  </section>
+  <main class="container page-body">
+    <div class="grid-2">
+      <!-- Config -->
+      <div class="flex-col gap-3">
+        <div class="card">
+          <div class="card-header"><div class="card-icon ci-purple">⚙️</div><h2 class="card-title">Configuration</h2></div>
+          <div class="card-body flex-col gap-2">
+            <!-- Words -->
+            <div class="form-group" style="margin-bottom:.5rem">
+              <label class="label">Number of Words</label>
+              <div class="range-wrap">
+                <input type="range" id="word-count" class="range-input" min="3" max="8" value="4"/>
+                <span class="range-val" id="word-count-val">4</span>
+              </div>
+            </div>
+            <!-- Separator -->
+            <div class="form-group">
+              <label class="label" for="separator">Word Separator</label>
+              <div class="input-wrap">
+                <select id="separator" class="form-input no-icon">
+                  <option value="-">Hyphen  ( - )</option>
+                  <option value=" ">Space   (   )</option>
+                  <option value=".">Dot     ( . )</option>
+                  <option value="_">Underscore ( _ )</option>
+                  <option value="">None (no separator)</option>
+                  <option value="@">At sign ( @ )</option>
+                </select>
+              </div>
+            </div>
+            <!-- Options -->
+            <div class="toggle-row">
+              <span class="toggle-label">Add random number</span>
+              <label class="toggle-switch"><input type="checkbox" id="add-num" checked/><span class="toggle-slider"></span></label>
+            </div>
+            <div class="toggle-row">
+              <span class="toggle-label">Add random symbol</span>
+              <label class="toggle-switch"><input type="checkbox" id="add-sym"/><span class="toggle-slider"></span></label>
+            </div>
+            <div class="toggle-row">
+              <span class="toggle-label">Capitalise first letters</span>
+              <label class="toggle-switch"><input type="checkbox" id="capitalise" checked/><span class="toggle-slider"></span></label>
+            </div>
+            <div class="toggle-row">
+              <span class="toggle-label">Mix numbers into words</span>
+              <label class="toggle-switch"><input type="checkbox" id="mix-nums"/><span class="toggle-slider"></span></label>
+            </div>
+            <div class="flex gap-1 mt-2">
+              <button id="gen-btn" class="btn btn-primary" style="flex:1">🎲 Generate</button>
+              <button id="copy-btn" class="btn btn-secondary">📋 Copy</button>
+            </div>
+          </div>
+        </div>
+        <!-- Strength -->
+        <div class="card">
+          <div class="card-header"><div class="card-icon ci-green">📊</div><h2 class="card-title">Entropy Analysis</h2></div>
+          <div class="card-body">
+            <div class="entropy-bar-wrap">
+              <div class="entropy-score"><span class="entropy-lbl">Password Entropy</span><span class="entropy-val" id="entr-val">— bits</span></div>
+              <div class="str-track"><div id="entr-fill" class="str-fill" style="width:0%"></div></div>
+              <div class="text-xs text-muted mt-1" id="entr-advice"></div>
+            </div>
+            <div class="mt-2 flex-col gap-1" id="entr-details"></div>
+          </div>
+        </div>
+      </div>
+      <!-- Output -->
+      <div class="flex-col gap-3">
+        <div class="card">
+          <div class="card-header"><div class="card-icon ci-cyan">🎲</div><h2 class="card-title">Generated Passphrase</h2></div>
+          <div class="card-body">
+            <div id="phrase-display" class="phrase-display">
+              <span style="color:var(--text3)">Click Generate to create a passphrase…</span>
+            </div>
+            <div class="mt-2 flex gap-1">
+              <button id="copy-btn-2" class="btn btn-secondary btn-sm" style="flex:1">📋 Copy to Clipboard</button>
+              <button id="use-btn" class="btn btn-green btn-sm" style="flex:1">✅ Use in Validator</button>
+            </div>
+          </div>
+        </div>
+        <!-- History -->
+        <div class="card">
+          <div class="card-header">
+            <div class="card-icon ci-amber">📜</div>
+            <h2 class="card-title">Generated History</h2>
+            <button id="clear-gen-hist" class="btn btn-danger btn-sm" style="margin-left:auto">Clear</button>
+          </div>
+          <div class="card-body flex-col gap-1" id="gen-history" style="max-height:250px;overflow-y:auto">
+            <div class="empty-state" id="gen-empty"><div class="empty-icon">🎲</div><div class="empty-msg">Generated passphrases appear here.</div></div>
+          </div>
+        </div>
+        <!-- Tips -->
+        <div class="card">
+          <div class="card-header"><div class="card-icon ci-pink">💡</div><h2 class="card-title">Why Passphrases?</h2></div>
+          <div class="card-body flex-col gap-2">
+            <div class="text-sm text-muted" style="line-height:1.7">
+              A 4-word passphrase like <code style="color:var(--cyan)">correct-horse-battery-staple</code> has ~44 bits of entropy — comparable to a random 8-character password but <strong>far more memorable</strong>.
+            </div>
+            <div class="flex gap-2">
+              <div class="card" style="flex:1;padding:.75rem;background:rgba(16,185,129,.05)">
+                <div class="text-xs text-muted">4 words</div>
+                <div class="mono" style="font-size:.85rem;color:var(--green)">~44 bits</div>
+              </div>
+              <div class="card" style="flex:1;padding:.75rem;background:rgba(6,182,212,.05)">
+                <div class="text-xs text-muted">5 words</div>
+                <div class="mono" style="font-size:.85rem;color:var(--cyan)">~58 bits</div>
+              </div>
+              <div class="card" style="flex:1;padding:.75rem;background:rgba(124,58,237,.05)">
+                <div class="text-xs text-muted">6 words</div>
+                <div class="mono" style="font-size:.85rem;color:var(--violet)">~77 bits</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+<script src="js/shared.js"></script>
+<script src="js/generator.js"></script>
+</body>
+</html>
